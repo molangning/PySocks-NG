@@ -1,5 +1,11 @@
 ### PySocks-NG
 
+# Heavy refactoring ahead!
+
+Major changes will be made to the project in order to improve usability. Try not to use this until I am done with my improvements. However, if you need to use this fork, Just beware of the future breakages down the road.
+
+Oh, and about everything is untested until I can do up tests.
+
 -----------------
 
 PySocks-NG is a fork of [PySocks](https://github.com/Anorov/PySocks) which is in turn a fork of [SocksiPy](http://socksipy.sourceforge.net/)
