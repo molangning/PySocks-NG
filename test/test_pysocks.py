@@ -79,8 +79,7 @@ class PySocksTestCase(TestCase):
         from test_server import TestServer
 
         cls.test_server = TestServer(address=TEST_SERVER_HOST,
-                                     port=TEST_SERVER_PORT,
-                                     engine='subprocess')
+                                     port=TEST_SERVER_PORT)
         cls.test_server.start()
 
     @classmethod
