@@ -683,7 +683,7 @@ class socksocket(_BaseSocket):
         ]
 
         if username and password:
-            http_headers.append(b"Proxy-Authorization: basic "
+            http_headers.append(b"Proxy-Authorization: Basic "
                                 + b64encode(username + b":" + password))
 
         http_headers.append(b"\r\n")
