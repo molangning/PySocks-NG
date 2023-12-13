@@ -1,5 +1,7 @@
 ### PySocks-NG
 
+-----------------
+
 PySocks-NG is a fork of [PySocks](https://github.com/Anorov/PySocks) which is in turn a fork of [SocksiPy](http://socksipy.sourceforge.net/)
 
 Py-Socks-NG include fixes and pull requests from the original project as the owner has disappeared into the oblivion and has not committed any code for [Almost 3 years, from Mid 2020 to 2023](https://github.com/Anorov). As such, quality fixes are not included in them,
