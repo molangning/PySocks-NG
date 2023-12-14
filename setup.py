@@ -29,7 +29,7 @@ setup(
     author="Mo Langning",
     author_email="emailproxy1423@duck.com",
     keywords=["socks", "proxy", "socks5", "client"],
-    py_modules=["socks", "sockshandler"],
+    py_modules=["pysocks"],
     install_requires=requirements,
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     classifiers=[

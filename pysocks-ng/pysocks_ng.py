@@ -13,6 +13,9 @@ import socket
 import struct
 from io import BytesIO
 
+from pysocks_ng_errors import *
+from pysocks_ng_constants import *
+
 try:
     from collections.abc import Callable
 except ImportError:
@@ -29,16 +32,7 @@ if os.name == "nt" and sys.version_info < (3, 0):
             "To run PySocks on Windows you must install win_inet_pton")
 
 log = logging.getLogger(__name__)
-
-PROXY_TYPE_SOCKS4 = SOCKS4 = 1
-PROXY_TYPE_SOCKS5 = SOCKS5 = 2
-PROXY_TYPE_HTTP = HTTP = 3
-
-PROXY_TYPES = {"SOCKS4": SOCKS4, "SOCKS5": SOCKS5, "HTTP": HTTP}
-PRINTABLE_PROXY_TYPES = dict(zip(PROXY_TYPES.values(), PROXY_TYPES.keys()))
-
 _orgsocket = _orig_socket = socket.socket
-
 
 def set_self_blocking(function):
 
@@ -58,74 +52,20 @@ def set_self_blocking(function):
                 self.setblocking(False)
     return wrapper
 
-
-class ProxyError(IOError):
-    """Socket_err contains original socket.error exception."""
-    def __init__(self, msg, socket_err=None):
-        self.msg = msg
-        self.socket_err = socket_err
-
-        if socket_err:
-            self.msg += ": {}".format(socket_err)
-
-    def __str__(self):
-        return self.msg
-
-
-class GeneralProxyError(ProxyError):
-    pass
-
-
-class ProxyConnectionError(ProxyError):
-    pass
-
-
-class SOCKS5AuthError(ProxyError):
-    pass
-
-
-class SOCKS5Error(ProxyError):
-    pass
-
-
-class SOCKS4Error(ProxyError):
-    pass
-
-
-class HTTPError(ProxyError):
-    pass
-
-SOCKS4_ERRORS = {
-    0x5B: "Request rejected or failed",
-    0x5C: ("Request rejected because SOCKS server cannot connect to identd on"
-           " the client"),
-    0x5D: ("Request rejected because the client program and identd report"
-           " different user-ids")
-}
-
-SOCKS5_ERRORS = {
-    0x01: "General SOCKS server failure",
-    0x02: "Connection not allowed by ruleset",
-    0x03: "Network unreachable",
-    0x04: "Host unreachable",
-    0x05: "Connection refused",
-    0x06: "TTL expired",
-    0x07: "Command not supported, or protocol error",
-    0x08: "Address type not supported"
-}
-
-DEFAULT_PORTS = {SOCKS4: 1080, SOCKS5: 1080, HTTP: 8080}
-
-
 def set_default_proxy(proxy_type=None, addr=None, port=None, rdns=True,
                       username=None, password=None):
     """Sets a default proxy.
 
     All further socksocket objects will use the default unless explicitly
     changed. All parameters are as for socket.set_proxy()."""
-    socksocket.default_proxy = (proxy_type, addr, port, rdns,
+    socksocket.default_proxy = (
+                                proxy_type, 
+                                addr,
+                                port,
+                                rdns,
                                 username.encode() if username else None,
-                                password.encode() if password else None)
+                                password.encode() if password else None
+                            )
 
 
 def setdefaultproxy(*args, **kwargs):
