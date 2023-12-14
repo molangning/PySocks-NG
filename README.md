@@ -94,7 +94,12 @@ socket.socket = socks.socksocket
 
 Note that monkeypatching may not work for all standard modules or for all third party modules, and generally isn't recommended. Monkeypatching is usually an anti-pattern in Python.
 
-PROBLEMS
+#### Problems
 ---------
 
 Please open a GitHub issue at https://github.com/molangning/PySocks-NG
+
+#### Todo
+---------
+
+- [ ] Migrate to .toml format
