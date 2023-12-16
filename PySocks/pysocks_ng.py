@@ -95,12 +95,19 @@ def wrap_module(module):
 wrapmodule = wrap_module
 
 
-def create_connection(dest_pair,
-                      timeout=None, source_address=None,
-                      proxy_type=None, proxy_addr=None,
-                      proxy_port=None, proxy_rdns=True,
-                      proxy_username=None, proxy_password=None,
-                      socket_options=None):
+def create_connection(
+                    dest_pair,
+                    timeout=None,
+                    source_address=None,
+                    proxy_type=None,
+                    proxy_addr=None,
+                    proxy_port=None,
+                    proxy_rdns=True,
+                    proxy_username=None,
+                    proxy_password=None,
+                    socket_options=None
+                ):
+
     """create_connection(dest_pair, *[, timeout], **proxy_args) -> socket object
 
     Like socket.create_connection(), but connects to proxy
@@ -112,20 +119,28 @@ def create_connection(dest_pair,
     source_address - tuple (host, port) for the socket to bind to as its source
     address before connecting (only for compatibility)
     """
+
     # Remove IPv6 brackets on the remote address and proxy address.
+
     remote_host, remote_port = dest_pair
+
     if remote_host.startswith("["):
         remote_host = remote_host.strip("[]")
+
     if proxy_addr and proxy_addr.startswith("["):
         proxy_addr = proxy_addr.strip("[]")
 
     err = None
 
     # Allow the SOCKS proxy to be on IPv4 or IPv6 addresses.
+
     for r in socket.getaddrinfo(proxy_addr, proxy_port, 0, socket.SOCK_STREAM):
-        family, socket_type, proto, canonname, sa = r
+
+        family, socket_type, proto, canon_name, sock_addr = r
         sock = None
+
         try:
+
             sock = socksocket(family, socket_type, proto)
 
             if socket_options:
@@ -242,26 +257,69 @@ class socksocket(_BaseSocket):
         else:
             self.settimeout(0.0)
 
-    def set_proxy(self, proxy_type=None, addr=None, port=None, rdns=True,
-                  username=None, password=None):
-        """ Sets the proxy to be used.
+    def set_proxy(
+                    self,
+                    proxy_type=None,
+                    addr=None,
+                    port=None,
+                    rdns=True,
+                    username=None,
+                    password=None
+                ):
+
+        """ 
+        
+        Sets the proxy to be used.
 
         proxy_type -  The type of the proxy to be used. Three types
                         are supported: PROXY_TYPE_SOCKS4 (including socks4a),
                         PROXY_TYPE_SOCKS5 and PROXY_TYPE_HTTP
+        
         addr -        The address of the server (IP or DNS).
+        
         port -        The port of the server. Defaults to 1080 for SOCKS
                         servers and 8080 for HTTP proxy servers.
+        
         rdns -        Should DNS queries be performed on the remote side
                        (rather than the local side). The default is True.
                        Note: This has no effect with SOCKS4 servers.
+        
         username -    Username to authenticate with to the server.
                        The default is no authentication.
+        
         password -    Password to authenticate with to the server.
-                       Only relevant when username is also provided."""
-        self.proxy = (proxy_type, addr, port, rdns,
-                      username.encode() if username else None,
-                      password.encode() if password else None)
+                       Only relevant when username is also provided.
+        
+        """
+
+        # Check if username and password is string
+
+        if not isinstance(username, str):
+            raise SOCKS5AuthError("Username is not a string")
+
+        if not isinstance(password, str):
+            raise SOCKS5AuthError("Password is not a string")
+
+        # Check if username and password is within 1 to 255 characters
+
+        if len(username) in range(1, 256):
+            username = username.encode()
+        else:
+            username = None
+
+        if len(password) in range(1, 256):
+            password = password.encode()
+        else:
+            password = None
+
+        self.proxy = (
+                        proxy_type,
+                        addr,
+                        port,
+                        rdns,
+                        username,
+                        password
+                        )
 
     def setproxy(self, *args, **kwargs):
         if "proxytype" in kwargs:
@@ -269,36 +327,49 @@ class socksocket(_BaseSocket):
         return self.set_proxy(*args, **kwargs)
 
     def bind(self, *pos, **kw):
-        """Implements proxy connection for UDP sockets.
+        """
+        Implements proxy connection for UDP sockets.
+        
+        Happens during the bind() phase.
+        
+        If it is just a normal tcp socket, it will just use
+        the bind function provided by socket
 
-        Happens during the bind() phase."""
-        (proxy_type, proxy_addr, proxy_port, rdns, username,
-         password) = self.proxy
+        """
+
+        if self.proxy:
+            proxy_type, proxy_addr, proxy_port, rdns, username, password = self.proxy
+        else:
+            raise GeneralProxyError("No proxies set")
+
         if not proxy_type or self.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) != socket.SOCK_DGRAM:
             return _orig_socket.bind(self, *pos, **kw)
 
         if self._proxyconn:
             raise socket.error(EINVAL, "Socket already bound to an address")
+
         if proxy_type != SOCKS5:
             msg = "UDP only supported by SOCKS5 proxy type"
             raise socket.error(EOPNOTSUPP, msg)
+
         super(socksocket, self).bind(*pos, **kw)
 
         # Need to specify actual local port because
         # some relays drop packets if a port of zero is specified.
         # Avoid specifying host address in case of NAT though.
+
         _, port = self.getsockname()
         dst = ("0.0.0.0", port)
 
         self._proxyconn = _orig_socket()
         proxy = self._proxy_addr()
         self._proxyconn.connect(proxy)
-
-        UDP_ASSOCIATE = b"\x03"
-        _, relay = self._SOCKS5_request(self._proxyconn, UDP_ASSOCIATE, dst)
+        
+        _, relay = self._SOCKS5_request(self._proxyconn, UDP_ASSOCIATE_CMD, dst)
 
         # The relay is most likely on the same host as the SOCKS proxy,
         # but some proxies return a private IP address (10.x.y.z)
+
         host, _ = proxy
         _, port = relay
         super(socksocket, self).connect((host, port))
@@ -306,32 +377,35 @@ class socksocket(_BaseSocket):
         self.proxy_sockname = ("0.0.0.0", 0)  # Unknown
 
     def sendto(self, bytes, *args, **kwargs):
+
         if self.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) != socket.SOCK_DGRAM:
             return super(socksocket, self).sendto(bytes, *args, **kwargs)
         if not self._proxyconn:
-            self.bind(("", 0))
+            self.udp_bind(("", 0))
 
         address = args[-1]
         flags = args[:-1]
-
         header = BytesIO()
-        RSV = b"\x00\x00"
         header.write(RSV)
-        STANDALONE = b"\x00"
         header.write(STANDALONE)
+
         self._write_SOCKS5_address(address, header)
 
-        sent = super(socksocket, self).send(header.getvalue() + bytes, *flags,
-                                            **kwargs)
+        sent = super(socksocket, self).send(header.getvalue() + bytes, 
+                                            *flags,
+                                            **kwargs
+                                            )
         return sent - header.tell()
 
     def send(self, bytes, flags=0, **kwargs):
+
         if self.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) == socket.SOCK_DGRAM:
             return self.sendto(bytes, flags, self.proxy_peername, **kwargs)
         else:
             return super(socksocket, self).send(bytes, flags, **kwargs)
 
     def recvfrom(self, bufsize, flags=0):
+
         if self.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) != socket.SOCK_DGRAM:
             return super(socksocket, self).recvfrom(bufsize, flags)
         if not self._proxyconn:
@@ -340,12 +414,16 @@ class socksocket(_BaseSocket):
         buf = BytesIO(super(socksocket, self).recv(bufsize + 1024, flags))
         buf.seek(2, SEEK_CUR)
         frag = struct.unpack(">B", buf.read(1))[0]
+
         if frag:
             raise NotImplementedError("Received UDP packet fragment")
+
         fromhost, fromport = self._read_SOCKS5_address(buf)
 
         if self.proxy_peername:
+
             peerhost, peerport = self.proxy_peername
+
             if fromhost != peerhost or peerport not in (0, fromport):
                 raise socket.error(EAGAIN, "Packet filtered")
 
@@ -367,26 +445,35 @@ class socksocket(_BaseSocket):
     getproxysockname = get_proxy_sockname
 
     def get_proxy_peername(self):
+
         """
         Returns the IP and port number of the proxy.
         """
+
         return self.getpeername()
 
     getproxypeername = get_proxy_peername
 
     def get_peername(self):
-        """Returns the IP address and port number of the destination machine.
 
-        Note: get_proxy_peername returns the proxy."""
+        """
+        Returns the IP address and port number of the destination machine.
+
+        Note: get_proxy_peername returns the proxy.
+        """
+
         return self.proxy_peername
 
     getpeername = get_peername
 
     def _negotiate_SOCKS5(self, *dest_addr):
-        """Negotiates a stream connection through a SOCKS5 server."""
-        CONNECT = b"\x01"
+
+        """
+        Negotiates a stream connection through a SOCKS5 server.
+        """
+
         self.proxy_peername, self.proxy_sockname = self._SOCKS5_request(
-            self, CONNECT, dest_addr)
+            self, CONNECT_CMD, dest_addr)
 
     def _SOCKS5_request(self, conn, cmd, dst):
         """
@@ -397,6 +484,7 @@ class socksocket(_BaseSocket):
 
         writer = conn.makefile("wb")
         reader = conn.makefile("rb", 0)  # buffering=0 renamed in Python 3
+
         try:
             # First we'll send the authentication packages we support.
             if username and password:
