@@ -103,3 +103,4 @@ Please open a GitHub issue at https://github.com/molangning/PySocks-NG
 ---------
 
 - [ ] Migrate to .toml format
+- [ ] Add support for bind
