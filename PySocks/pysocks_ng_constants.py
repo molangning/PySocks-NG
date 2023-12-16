@@ -32,3 +32,44 @@ SOCKS5_ERRORS = {
     0x07: "Command not supported, or protocol error",
     0x08: "Address type not supported"
 }
+
+RSV = b"\x00\x00"
+STANDALONE = b"\x00"
+SOCKS5_VER = b"\x05"
+
+# Command cmds that clients can send
+
+CONNECT_CMD = b"\x01"
+BIND_CMD = b"\x02"
+UDP_ASSOCIATE_CMD = b"\x03"
+
+# Constants for authentication methods
+
+NO_AUTH = b"\x00"
+GSSAPI_AUTH = b"\x01"
+USER_PASS_AUTH = b"\x02"
+NO_SUPPORTED_AUTH = b"\xFF"
+
+# Constants for username password authentication
+
+USER_PASS_VER = b"\x01"
+USER_PASS_AUTH_SUCCESS = b"\x00"
+USER_PASS_AUTH_FAIL	= b"\x01"
+
+# Reply codes
+
+REPLY_SUCCESS = b"\x00"
+REPLY_GENERAL_FAILURE = b"\x01"
+REPLY_CONNECTION_NOT_ALLOWED= b"\x02"
+REPLY_NETWORK_UNREACHABLE = b"\x03"
+REPLY_HOST_UNREACHABLE = b"\x04"
+REPLY_CONNECTION_REFUSED = b"\x05"
+REPLY_TTL_EXPIRED = b"\x06"
+REPLY_COMMAND_UNSUPPORTED = b"\x07"
+REPLY_ADDRESS_UNSUPPORTED = b"\x08"
+
+# ATYP fields
+
+ATYPIPV4 = b"\x01"
+ATYPDOMAIN = b"\x03"
+ATYPIPV6 = b"\x04"
