@@ -5,6 +5,7 @@
 Major changes will be made to the project in order to improve usability. Try not to use this until I am done with my improvements. However, if you need to use this fork, Just beware of the future breakages down the road.
 
 Oh, and about everything is untested until I can do up tests.
+I'm going to try and fix the PySocks-NG server so this project is semi abandoned for now
 
 -----------------
 
