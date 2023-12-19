@@ -22,15 +22,16 @@ SOCKS4_ERRORS = {
            " different user-ids")
 }
 
-SOCKS5_ERRORS = {
-    0x01: "General SOCKS server failure",
-    0x02: "Connection not allowed by ruleset",
-    0x03: "Network unreachable",
-    0x04: "Host unreachable",
-    0x05: "Connection refused",
-    0x06: "TTL expired",
-    0x07: "Command not supported, or protocol error",
-    0x08: "Address type not supported"
+SOCKS5_STATUSES = {
+    b'\x00': "Connection Succeeded",
+    b'\x01': "General SOCKS server failure",
+    b'\x02': "Connection not allowed by ruleset",
+    b'\x03': "Network unreachable",
+    b'\x04': "Host unreachable",
+    b'\x05': "Connection refused",
+    b'\x06': "TTL expired",
+    b'\x07': "Command not supported, or protocol error",
+    b'\x08': "Address type not supported"
 }
 
 RSV = b"\x00\x00"
