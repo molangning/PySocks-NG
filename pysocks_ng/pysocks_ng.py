@@ -6,8 +6,8 @@ import socket as _socket
 from _socket import *
 
 from pysocks_ng.custom_logger import get_module_logger 
-from pysocks_ng.pysocks_ng_constants import *
-from pysocks_ng.pysocks_ng_errors import *
+from pysocks_ng.constants import *
+from pysocks_ng.errors import *
 
 # Those imports are horrible, do we have an alternative?
 
